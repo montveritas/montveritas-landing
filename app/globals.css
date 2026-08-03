@@ -1,0 +1,111 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    --bg-navy: #081B33;
+    --bg-navy-dark: #051224;
+    --bg-navy-light: #0d2647;
+    --color-gold: #C89B3C;
+    --color-gold-light: #E5C170;
+    --color-gold-dark: #A67C2E;
+    --bg-offwhite: #F5F5F3;
+    --bg-card: #FFFFFF;
+    --text-primary: #1E1E1E;
+    --text-secondary: #555555;
+    --text-muted: #707070;
+    --border-color: #E6E6E6;
+  }
+
+  html {
+    scroll-behavior: smooth;
+    font-family: var(--font-montserrat), sans-serif;
+    color: #1E1E1E;
+    background-color: #081B33;
+  }
+
+  h1, h2, h3, h4, .font-serif {
+    font-family: var(--font-playfair), serif;
+  }
+}
+
+/* Custom Montveritas UI Utilities */
+.bg-navy {
+  background-color: #081B33;
+}
+
+.bg-navy-dark {
+  background-color: #051224;
+}
+
+.bg-navy-light {
+  background-color: #0d2647;
+}
+
+.bg-offwhite {
+  background-color: #F5F5F3;
+}
+
+.text-gold {
+  color: #C89B3C;
+}
+
+.text-gold-light {
+  color: #E5C170;
+}
+
+.border-gold {
+  border-color: #C89B3C;
+}
+
+.bg-gold {
+  background-color: #C89B3C;
+}
+
+.bg-gold-dark {
+  background-color: #A67C2E;
+}
+
+/* Gold Gradient Button */
+.btn-gold {
+  background: linear-gradient(135deg, #C89B3C 0%, #A67C2E 100%);
+  color: #FFFFFF;
+  transition: all 0.3s ease;
+}
+
+.btn-gold:hover {
+  background: linear-gradient(135deg, #D4AF37 0%, #B88B32 100%);
+  box-shadow: 0 10px 25px -5px rgba(200, 155, 60, 0.4);
+  transform: translateY(-2px);
+}
+
+.btn-gold-outline {
+  border: 1px solid #C89B3C;
+  color: #C89B3C;
+  background: transparent;
+  transition: all 0.3s ease;
+}
+
+.btn-gold-outline:hover {
+  background-color: #C89B3C;
+  color: #FFFFFF;
+  box-shadow: 0 10px 25px -5px rgba(200, 155, 60, 0.3);
+  transform: translateY(-2px);
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #051224;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #C89B3C;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #E5C170;
+}
