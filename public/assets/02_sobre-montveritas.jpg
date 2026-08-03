@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="675" viewBox="0 0 1200 675">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#081B33"/>
+      <stop offset="50%" stop-color="#051224"/>
+      <stop offset="100%" stop-color="#0a2242"/>
+    </linearGradient>
+    <linearGradient id="gold" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#E5C170"/>
+      <stop offset="50%" stop-color="#C89B3C"/>
+      <stop offset="100%" stop-color="#A67C2E"/>
+    </linearGradient>
+    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="8" result="blur"/>
+      <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+    </filter>
+  </defs>
+  
+  <!-- Background -->
+  <rect width="100%" height="100%" fill="url(#bg)"/>
+  
+  <!-- Geometric Decorative Lines -->
+  <circle cx="600" cy="337.5" r="270" fill="none" stroke="url(#gold)" stroke-width="1" opacity="0.15"/>
+  <circle cx="600" cy="337.5" r="202.5" fill="none" stroke="url(#gold)" stroke-width="1" stroke-dasharray="8 8" opacity="0.2"/>
+  <rect x="40" y="40" width="1120" height="595" fill="none" stroke="url(#gold)" stroke-width="1" opacity="0.2"/>
+  
+  <!-- Center Emblem -->
+  <g transform="translate(600, 297.5)">
+    <circle cx="0" cy="0" r="48" fill="#081B33" stroke="url(#gold)" stroke-width="2"/>
+    <text x="0" y="16" font-family="'Playfair Display', Georgia, serif" font-size="44" font-weight="bold" fill="url(#gold)" text-anchor="middle">M</text>
+  </g>
+  
+  <!-- Text Content -->
+  <text x="600" y="387.5" font-family="'Playfair Display', Georgia, serif" font-size="32" font-weight="bold" fill="#FFFFFF" text-anchor="middle" letter-spacing="2">SOBRE A MONTVERITAS</text>
+  <text x="600" y="427.5" font-family="'Montserrat', sans-serif" font-size="16" font-weight="500" fill="#C89B3C" text-anchor="middle" letter-spacing="3">ESTRATÉGIA ANTES DE QUALQUER SOLUÇÃO</text>
+  <text x="600" y="457.5" font-family="'Montserrat', sans-serif" font-size="12" fill="#888888" text-anchor="middle" letter-spacing="4">MONTVERITAS • ESTRATÉGIAS DE ALAVANCAGEM PATRIMONIAL</text>
+</svg>
