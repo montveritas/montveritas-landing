@@ -4,27 +4,29 @@ import React, { useState } from 'react';
 import { Container } from '@/components/foundation/Container';
 import { Button } from '@/components/ui/Button';
 import { ArrowRight, CheckCircle2, ChevronDown, Sparkles } from 'lucide-react';
+import { GOALS_LIST } from '@/lib/goals';
 
-export const Hero: React.FC = () => {
-  const [selectedGoals, setSelectedGoals] = useState<string[]>([]);
+interface HeroProps {
+  selectedGoals?: string[];
+  onToggleGoal?: (goalId: string) => void;
+}
 
-  const goalsList = [
-    { id: 'tranquilidade', label: '🕊️ Ter tranquilidade financeira para dormir em paz' },
-    { id: 'casa', label: '🏠 Comprar minha casa' },
-    { id: 'construir', label: '🏡 Construir minha casa' },
-    { id: 'carro', label: '🚗 Trocar de veículo' },
-    { id: 'investir', label: '📈 Investir melhor e organizar recursos' },
-    { id: 'juros', label: '💰 Pagar menos juros e estancar perdas' },
-    { id: 'familia', label: '👨‍👩‍👧 Proteger minha família' },
-    { id: 'aposentadoria', label: '🏖️ Garantir uma aposentadoria tranquila' },
-    { id: 'negocio', label: '🏢 Abrir ou expandir meu negócio' },
-    { id: 'dividas', label: '💳 Quitar dívidas com inteligência' },
-  ];
+export const Hero: React.FC<HeroProps> = ({
+  selectedGoals: propSelectedGoals,
+  onToggleGoal,
+}) => {
+  const [internalSelectedGoals, setInternalSelectedGoals] = useState<string[]>([]);
+
+  const selectedGoals = propSelectedGoals ?? internalSelectedGoals;
 
   const toggleGoal = (id: string) => {
-    setSelectedGoals((prev) =>
-      prev.includes(id) ? prev.filter((g) => g !== id) : [...prev, id]
-    );
+    if (onToggleGoal) {
+      onToggleGoal(id);
+    } else {
+      setInternalSelectedGoals((prev) =>
+        prev.includes(id) ? prev.filter((g) => g !== id) : [...prev, id]
+      );
+    }
   };
 
   return (
@@ -104,7 +106,7 @@ export const Hero: React.FC = () => {
           </p>
 
           <div className="flex flex-wrap gap-2.5 sm:gap-3">
-            {goalsList.map((goal) => {
+            {GOALS_LIST.map((goal) => {
               const isSelected = selectedGoals.includes(goal.id);
               return (
                 <button

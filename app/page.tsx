@@ -1,4 +1,6 @@
-import React from 'react';
+'use client';
+
+import React, { useState } from 'react';
 import { Header } from '@/components/layout/Header';
 import { Hero } from '@/components/sections/Hero';
 import { StrategicBenefits } from '@/components/sections/StrategicBenefits';
@@ -13,6 +15,14 @@ import { PreDiagnosticCTA } from '@/components/sections/PreDiagnosticCTA';
 import { Footer } from '@/components/layout/Footer';
 
 export default function Home() {
+  const [selectedGoals, setSelectedGoals] = useState<string[]>([]);
+
+  const handleToggleGoal = (goalId: string) => {
+    setSelectedGoals((prev) =>
+      prev.includes(goalId) ? prev.filter((id) => id !== goalId) : [...prev, goalId]
+    );
+  };
+
   return (
     <div className="min-h-screen bg-[#081B33] text-white flex flex-col selection:bg-[#C89B3C] selection:text-white">
       {/* 1. HEADER (Top Navigation Bar) */}
@@ -21,7 +31,7 @@ export default function Home() {
       {/* Main Page Body */}
       <main className="flex-1">
         {/* Step 1 in Cognitive Journey: HERO (O que é isso?) */}
-        <Hero />
+        <Hero selectedGoals={selectedGoals} onToggleGoal={handleToggleGoal} />
 
         {/* Step 2 in Cognitive Journey: STRATEGIC BENEFITS (O que eu ganho?) */}
         <StrategicBenefits />
@@ -48,7 +58,7 @@ export default function Home() {
         <FAQSection />
 
         {/* Step 9 in Cognitive Journey: PRÉ-DIAGNÓSTICO / FORMULÁRIO (Estou pronto para planejar meus passos) */}
-        <PreDiagnosticCTA />
+        <PreDiagnosticCTA selectedGoals={selectedGoals} onToggleGoal={handleToggleGoal} />
       </main>
 
       {/* FOOTER (Institutional Footer) */}

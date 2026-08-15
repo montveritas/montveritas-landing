@@ -44,7 +44,7 @@ export const StrategicJourney: React.FC = () => {
   ];
 
   return (
-    <Section id="jornada" variant="navy" spacing="default">
+    <Section id="como-funciona" variant="navy" spacing="default">
       <Container size="default">
         {/* Header da Seção Jornada Estratégica */}
         <Heading
