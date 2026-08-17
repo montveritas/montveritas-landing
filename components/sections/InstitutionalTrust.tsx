@@ -2,7 +2,6 @@ import React from 'react';
 import { Section } from '@/components/foundation/Section';
 import { Container } from '@/components/foundation/Container';
 import { Heading } from '@/components/foundation/Heading';
-import { Grid } from '@/components/foundation/Grid';
 import { Card } from '@/components/ui/Card';
 import { IconWrapper } from '@/components/ui/IconWrapper';
 import { Scale, ShieldCheck, Network, Clock, MessageSquareText } from 'lucide-react';
@@ -77,9 +76,51 @@ export const InstitutionalTrust: React.FC<InstitutionalTrustProps> = ({
   ];
 
   const displayItems = items || defaultTrustPillars;
+  const topPillars = displayItems.slice(0, 2);
+  const bottomPillars = displayItems.slice(2);
+
+  const renderCard = (item: TrustPillarItem) => (
+    <Card
+      key={item.id}
+      variant="premium"
+      hoverEffect={false}
+      className="flex flex-col justify-between h-full border-[#C89B3C]/25 bg-[#081B33]/80 p-8 hover:border-[#C89B3C]/45 transition-colors"
+    >
+      <div>
+        <div className="flex items-center justify-between mb-6">
+          <IconWrapper
+            icon={item.icon}
+            size="md"
+            variant="gold-glow"
+            shape="rounded"
+          />
+          <span className="text-[11px] font-sans font-semibold uppercase tracking-widest text-[#E5C170] px-3 py-1 rounded-full bg-[#051224] border border-[#C89B3C]/30">
+            {item.pillarTag}
+          </span>
+        </div>
+
+        <h3 className="font-serif text-xl sm:text-2xl font-bold text-white mb-4 leading-snug">
+          {item.titlePlaceholder}
+        </h3>
+
+        <p className="text-sm text-gray-200 font-sans mb-4 leading-relaxed bg-[#051224]/70 p-4 rounded-xl border-l-2 border-[#C89B3C]">
+          &quot;{item.descriptionPlaceholder}&quot;
+        </p>
+
+        <p className="text-xs sm:text-sm text-gray-300 font-sans leading-relaxed">
+          {item.principlePlaceholder}
+        </p>
+      </div>
+
+      <div className="mt-6 pt-4 border-t border-[#C89B3C]/15 flex items-center justify-between text-[11px] text-[#E5C170] font-sans font-medium uppercase tracking-wider">
+        <span>COMPROMISSO MONTVERITAS</span>
+        <span className="w-1.5 h-1.5 rounded-full bg-[#C89B3C]" />
+      </div>
+    </Card>
+  );
 
   return (
-    <Section id="confianca-institucional" variant="navy-dark" spacing="default">
+    <Section id="sobre" variant="navy-dark" spacing="default">
       <Container size="default">
         {/* Header da Seção */}
         <Heading
@@ -92,48 +133,18 @@ export const InstitutionalTrust: React.FC<InstitutionalTrustProps> = ({
           Por que confiar na Montveritas
         </Heading>
 
-        {/* Grid dos Pilares da Confiança */}
-        <Grid cols={1} colsMd={2} colsLg={3} gap={32} className="mt-12">
-          {displayItems.map((item) => (
-            <Card
-              key={item.id}
-              variant="premium"
-              hoverEffect={false}
-              className="flex flex-col justify-between h-full border-[#C89B3C]/25 bg-[#081B33]/80 p-8 hover:border-[#C89B3C]/45 transition-colors"
-            >
-              <div>
-                <div className="flex items-center justify-between mb-6">
-                  <IconWrapper
-                    icon={item.icon}
-                    size="md"
-                    variant="gold-glow"
-                    shape="rounded"
-                  />
-                  <span className="text-[11px] font-sans font-semibold uppercase tracking-widest text-[#E5C170] px-3 py-1 rounded-full bg-[#051224] border border-[#C89B3C]/30">
-                    {item.pillarTag}
-                  </span>
-                </div>
+        {/* Pilares da Confiança em Formação Piramidal / Triangular */}
+        <div className="mt-12 space-y-8">
+          {/* Nível Superior da Pirâmide: Pilares 1 e 2 centralizados */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto w-full">
+            {topPillars.map(renderCard)}
+          </div>
 
-                <h3 className="font-serif text-xl sm:text-2xl font-bold text-white mb-4 leading-snug">
-                  {item.titlePlaceholder}
-                </h3>
-
-                <p className="text-sm text-gray-200 font-sans mb-4 leading-relaxed bg-[#051224]/70 p-4 rounded-xl border-l-2 border-[#C89B3C]">
-                  &quot;{item.descriptionPlaceholder}&quot;
-                </p>
-
-                <p className="text-xs sm:text-sm text-gray-300 font-sans leading-relaxed">
-                  {item.principlePlaceholder}
-                </p>
-              </div>
-
-              <div className="mt-6 pt-4 border-t border-[#C89B3C]/15 flex items-center justify-between text-[11px] text-[#E5C170] font-sans font-medium uppercase tracking-wider">
-                <span>COMPROMISSO MONTVERITAS</span>
-                <span className="w-1.5 h-1.5 rounded-full bg-[#C89B3C]" />
-              </div>
-            </Card>
-          ))}
-        </Grid>
+          {/* Nível Inferior da Pirâmide: Pilares 3, 4 e 5 */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 w-full">
+            {bottomPillars.map(renderCard)}
+          </div>
+        </div>
 
         {/* Declaração de Confiança */}
         <div className="mt-12 pt-8 border-t border-[#C89B3C]/20 text-center max-w-3xl mx-auto">

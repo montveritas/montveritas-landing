@@ -1,47 +1,159 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { Section } from '@/components/foundation/Section';
 import { Container } from '@/components/foundation/Container';
 import { Heading } from '@/components/foundation/Heading';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
-import { ArrowRight, CheckCircle2, Shield, Clock } from 'lucide-react';
+import { ArrowRight, CheckCircle2, Shield, Clock, Sparkles } from 'lucide-react';
+import { GOALS_LIST } from '@/lib/goals';
 
-export const PreDiagnosticCTA: React.FC = () => {
+interface PreDiagnosticCTAProps {
+  selectedGoals?: string[];
+  onToggleGoal?: (goalId: string) => void;
+}
+
+export const PreDiagnosticCTA: React.FC<PreDiagnosticCTAProps> = ({
+  selectedGoals: propSelectedGoals,
+  onToggleGoal,
+}) => {
   const [name, setName] = useState('');
   const [whatsapp, setWhatsapp] = useState('');
   const [city, setCity] = useState('');
-  const [goal, setGoal] = useState('casa');
+  const [internalSelectedGoals, setInternalSelectedGoals] = useState<string[]>([]);
   const [submitted, setSubmitted] = useState(false);
+  const [errors, setErrors] = useState<{ name?: string; whatsapp?: string; city?: string; goals?: string }>({});
+  const [, setTouched] = useState<{ name?: boolean; whatsapp?: boolean; city?: boolean }>({});
 
-  const goalLabels: Record<string, string> = {
-    tranquilidade: 'Ter tranquilidade financeira para dormir em paz',
-    casa: 'Comprar minha casa ou imóvel',
-    construir: 'Construir minha casa',
-    carro: 'Trocar de veículo',
-    dividas: 'Quitar dívidas ou pagamentos',
-    investir: 'Investir melhor e organizar recursos',
-    proteger: 'Proteger minha família e patrimônio',
-    outro: 'Outro objetivo específico',
+  // Refs for auto-scrolling to error field
+  const nameRef = useRef<HTMLInputElement>(null);
+  const whatsappRef = useRef<HTMLInputElement>(null);
+  const cityRef = useRef<HTMLInputElement>(null);
+  const goalsRef = useRef<HTMLDivElement>(null);
+
+  const selectedGoals = propSelectedGoals ?? internalSelectedGoals;
+
+  const toggleGoal = (id: string) => {
+    if (onToggleGoal) {
+      onToggleGoal(id);
+    } else {
+      setInternalSelectedGoals((prev) =>
+        prev.includes(id) ? prev.filter((g) => g !== id) : [...prev, id]
+      );
+    }
+    // Clear goals error if at least one goal is selected
+    if (errors.goals) {
+      setErrors((prev) => ({ ...prev, goals: undefined }));
+    }
+  };
+
+  const formatWhatsAppInput = (val: string) => {
+    if (val.startsWith('+')) {
+      return val.replace(/[^\d+ ]/g, '');
+    }
+    const digits = val.replace(/\D/g, '');
+    if (!digits) return '';
+    if (digits.length <= 2) {
+      return `(${digits}`;
+    } else if (digits.length <= 7) {
+      return `(${digits.slice(0, 2)}) ${digits.slice(2)}`;
+    } else if (digits.length <= 11) {
+      return `(${digits.slice(0, 2)}) ${digits.slice(2, 7)}-${digits.slice(7)}`;
+    } else {
+      return `(${digits.slice(0, 2)}) ${digits.slice(2, 7)}-${digits.slice(7, 11)}`;
+    }
+  };
+
+  const handleWhatsappChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const rawValue = e.target.value;
+    const formatted = formatWhatsAppInput(rawValue);
+    setWhatsapp(formatted);
+    if (errors.whatsapp) {
+      setErrors((prev) => ({ ...prev, whatsapp: undefined }));
+    }
+  };
+
+  const validateForm = () => {
+    const newErrors: { name?: string; whatsapp?: string; city?: string; goals?: string } = {};
+
+    // 1. Nome Completo
+    const nameTrimmed = name.trim();
+    const nameWords = nameTrimmed.split(/\s+/).filter(Boolean);
+    const nameLetters = (nameTrimmed.match(/[a-zA-ZÀ-ÿ]/g) || []).length;
+    const nameValidChars = /^[a-zA-ZÀ-ÿ\s'\-]+$/.test(nameTrimmed);
+
+    if (!nameTrimmed || nameWords.length < 2 || nameLetters < 5 || !nameValidChars) {
+      newErrors.name = 'Insira seu nome completo (nome e sobrenome, sem números ou caracteres especiais).';
+    }
+
+    // 2. WhatsApp
+    const digitsOnly = whatsapp.replace(/\D/g, '');
+    const hasInvalidLeadingZeroDDD = digitsOnly.length >= 2 && digitsOnly.startsWith('0');
+    if (!whatsapp.trim() || digitsOnly.length < 10 || digitsOnly.length > 13 || hasInvalidLeadingZeroDDD) {
+      newErrors.whatsapp = 'Insira um número de WhatsApp válido com DDD.';
+    }
+
+    // 3. Cidade e Estado / País
+    const cityTrimmed = city.trim();
+    const cityLetters = (cityTrimmed.match(/[a-zA-ZÀ-ÿ]/g) || []).length;
+    const cityValidChars = /^[a-zA-ZÀ-ÿ\s\-_\/\\]+$/.test(cityTrimmed);
+
+    if (!cityTrimmed || cityLetters < 3 || !cityValidChars) {
+      newErrors.city = 'Insira sua cidade e estado/país (mínimo de 3 letras, sem números).';
+    }
+
+    // 4. Objetivos
+    if (selectedGoals.length < 1) {
+      newErrors.goals = 'Selecione pelo menos 1 objetivo para realizar o seu diagnóstico.';
+    }
+
+    return newErrors;
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (whatsapp.trim()) {
-      setSubmitted(true);
+    setTouched({ name: true, whatsapp: true, city: true });
 
-      // Pre-fill WhatsApp message
-      const selectedGoalText = goalLabels[goal] || goal;
-      const message = `Olá Montveritas! Gostaria de agendar meu Diagnóstico Patrimonial Gratuito.\n\n👤 *Nome:* ${name}\n📱 *WhatsApp:* ${whatsapp}\n📍 *Cidade:* ${city}\n🎯 *Objetivo Principal:* ${selectedGoalText}`;
-      
-      const whatsappUrl = `https://wa.me/5535988170330?text=${encodeURIComponent(message)}`;
-      window.open(whatsappUrl, '_blank');
+    const formErrors = validateForm();
+    if (Object.keys(formErrors).length > 0) {
+      setErrors(formErrors);
+
+      // Auto-scroll to the first field with an error
+      if (formErrors.name && nameRef.current) {
+        nameRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        nameRef.current.focus();
+      } else if (formErrors.whatsapp && whatsappRef.current) {
+        whatsappRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        whatsappRef.current.focus();
+      } else if (formErrors.city && cityRef.current) {
+        cityRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        cityRef.current.focus();
+      } else if (formErrors.goals && goalsRef.current) {
+        goalsRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+      return;
     }
+
+    setErrors({});
+    setSubmitted(true);
+
+    // Format selected goals into WhatsApp message
+    const selectedGoalObjects = GOALS_LIST.filter((g) => selectedGoals.includes(g.id));
+    const goalsFormattedText =
+      selectedGoalObjects.length > 0
+        ? selectedGoalObjects.map((g) => `• ${g.label}`).join('\n')
+        : '• Analisar panorama financeiro geral';
+
+    const message = `Olá Montveritas! Gostaria de agendar meu Diagnóstico Patrimonial Gratuito.\n\n👤 *Nome:* ${name.trim()}\n📱 *WhatsApp:* ${whatsapp.trim()}\n📍 *Cidade:* ${city.trim()}\n\n🎯 *O que gostaria de conquistar (${selectedGoalObjects.length}):*\n${goalsFormattedText}`;
+
+    const whatsappUrl = `https://wa.me/5535988170330?text=${encodeURIComponent(message)}`;
+    window.open(whatsappUrl, '_blank');
   };
 
   return (
     <Section id="formulario" variant="navy" spacing="default">
+      <div id="contato" className="scroll-mt-24" />
       <Container size="narrow">
         {/* Frase de Conexão antes do formulário */}
         <div className="mb-10 text-center">
@@ -107,71 +219,126 @@ export const PreDiagnosticCTA: React.FC = () => {
                 💡 <span className="text-[#E5C170] font-semibold">Confirmação de Expectativa:</span> Suas respostas permitem que nosso especialista prepare uma análise inicial totalmente personalizada para a nossa conversa no WhatsApp.
               </div>
 
-              <form onSubmit={handleSubmit} className="mt-6 space-y-4">
+              <form onSubmit={handleSubmit} className="mt-6 space-y-4" noValidate>
                 {/* Campo 1: Nome */}
                 <div>
                   <label className="block text-xs uppercase tracking-wider text-gray-300 font-semibold mb-1.5">
-                    Nome
+                    Nome Completo <span className="text-[#E5C170]">*</span>
                   </label>
                   <input
+                    ref={nameRef}
                     type="text"
                     value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    placeholder="Seu nome completo"
-                    required
-                    className="w-full px-4 py-3 rounded-xl bg-[#081B33] border border-[#C89B3C]/30 text-white placeholder-gray-500 focus:outline-none focus:border-[#C89B3C] transition-colors text-sm"
+                    onChange={(e) => {
+                      setName(e.target.value);
+                      if (errors.name) setErrors((prev) => ({ ...prev, name: undefined }));
+                    }}
+                    onBlur={() => setTouched((prev) => ({ ...prev, name: true }))}
+                    placeholder="Seu nome completo (ex: João Silva)"
+                    className={`w-full px-4 py-3 rounded-xl bg-[#081B33] border text-white placeholder-gray-500 focus:outline-none transition-colors text-sm ${
+                      errors.name ? 'border-red-500 focus:border-red-400' : 'border-[#C89B3C]/30 focus:border-[#C89B3C]'
+                    }`}
                   />
+                  {errors.name && (
+                    <p className="mt-1.5 text-xs text-red-400 font-sans flex items-center gap-1">
+                      ⚠️ {errors.name}
+                    </p>
+                  )}
                 </div>
 
                 {/* Campo 2: WhatsApp */}
                 <div>
                   <label className="block text-xs uppercase tracking-wider text-gray-300 font-semibold mb-1.5">
-                    WhatsApp
+                    WhatsApp <span className="text-[#E5C170]">*</span>
                   </label>
                   <input
+                    ref={whatsappRef}
                     type="tel"
                     value={whatsapp}
-                    onChange={(e) => setWhatsapp(e.target.value)}
-                    placeholder="(35) 98817-0330 ou seu DDD"
-                    required
-                    className="w-full px-4 py-3 rounded-xl bg-[#081B33] border border-[#C89B3C]/30 text-white placeholder-gray-500 focus:outline-none focus:border-[#C89B3C] transition-colors text-sm"
+                    onChange={handleWhatsappChange}
+                    onBlur={() => setTouched((prev) => ({ ...prev, whatsapp: true }))}
+                    placeholder="(00) 9 0000 0000"
+                    className={`w-full px-4 py-3 rounded-xl bg-[#081B33] border text-white placeholder-gray-500 focus:outline-none transition-colors text-sm ${
+                      errors.whatsapp ? 'border-red-500 focus:border-red-400' : 'border-[#C89B3C]/30 focus:border-[#C89B3C]'
+                    }`}
                   />
+                  {errors.whatsapp && (
+                    <p className="mt-1.5 text-xs text-red-400 font-sans flex items-center gap-1">
+                      ⚠️ {errors.whatsapp}
+                    </p>
+                  )}
                 </div>
 
                 {/* Campo 3: Cidade */}
                 <div>
                   <label className="block text-xs uppercase tracking-wider text-gray-300 font-semibold mb-1.5">
-                    Cidade
+                    Cidade e Estado / País <span className="text-[#E5C170]">*</span>
                   </label>
                   <input
+                    ref={cityRef}
                     type="text"
                     value={city}
-                    onChange={(e) => setCity(e.target.value)}
-                    placeholder="Sua cidade e estado (ou país se residir no exterior)"
-                    required
-                    className="w-full px-4 py-3 rounded-xl bg-[#081B33] border border-[#C89B3C]/30 text-white placeholder-gray-500 focus:outline-none focus:border-[#C89B3C] transition-colors text-sm"
+                    onChange={(e) => {
+                      setCity(e.target.value);
+                      if (errors.city) setErrors((prev) => ({ ...prev, city: undefined }));
+                    }}
+                    onBlur={() => setTouched((prev) => ({ ...prev, city: true }))}
+                    placeholder="Sua cidade e estado (ex: Belo Horizonte/MG, Lisboa/Portugal)"
+                    className={`w-full px-4 py-3 rounded-xl bg-[#081B33] border text-white placeholder-gray-500 focus:outline-none transition-colors text-sm ${
+                      errors.city ? 'border-red-500 focus:border-red-400' : 'border-[#C89B3C]/30 focus:border-[#C89B3C]'
+                    }`}
                   />
+                  {errors.city && (
+                    <p className="mt-1.5 text-xs text-red-400 font-sans flex items-center gap-1">
+                      ⚠️ {errors.city}
+                    </p>
+                  )}
                 </div>
 
-                {/* Campo 4: Objetivo Principal */}
-                <div>
-                  <label className="block text-xs uppercase tracking-wider text-gray-300 font-semibold mb-1.5">
-                    Objetivo Principal
-                  </label>
-                  <select
-                    value={goal}
-                    onChange={(e) => setGoal(e.target.value)}
-                    className="w-full px-4 py-3 rounded-xl bg-[#081B33] border border-[#C89B3C]/30 text-white focus:outline-none focus:border-[#C89B3C] transition-colors text-sm"
-                  >
-                    <option value="tranquilidade">Ter tranquilidade financeira para dormir em paz</option>
-                    <option value="casa">Comprar minha casa ou imóvel</option>
-                    <option value="construir">Construir minha casa</option>
-                    <option value="carro">Trocar de veículo</option>
-                    <option value="dividas">Quitar dívidas ou pagamentos</option>
-                    <option value="investir">Investir melhor e organizar recursos</option>
-                    <option value="proteger">Proteger minha família e patrimônio</option>
-                    <option value="outro">Outro objetivo específico</option>
-                  </select>
+                {/* Campo 4: O QUE VOCÊ GOSTARIA DE CONQUISTAR? */}
+                <div ref={goalsRef} className="pt-2">
+                  <div className="flex items-center gap-2 mb-1.5 text-[#C89B3C]">
+                    <Sparkles className="w-4 h-4" />
+                    <label className="block text-xs uppercase tracking-wider text-gray-200 font-bold">
+                      O QUE VOCÊ GOSTARIA DE CONQUISTAR? <span className="text-[#E5C170]">*</span>
+                    </label>
+                  </div>
+                  <p className="text-xs text-gray-400 mb-3 font-sans">
+                    Clique nas opções para selecionar seus objetivos (seleção múltipla):
+                  </p>
+
+                  <div className="flex flex-wrap gap-2.5">
+                    {GOALS_LIST.map((goalItem) => {
+                      const isSelected = selectedGoals.includes(goalItem.id);
+                      return (
+                        <button
+                          key={goalItem.id}
+                          onClick={() => toggleGoal(goalItem.id)}
+                          type="button"
+                          className={`px-3.5 py-2.5 rounded-xl text-xs sm:text-sm font-sans transition-all duration-200 cursor-pointer flex items-center gap-2 border text-left ${
+                            isSelected
+                              ? 'bg-gradient-to-r from-[#C89B3C] to-[#E5C170] text-[#051224] border-[#E5C170] font-bold shadow-md shadow-[#C89B3C]/20 scale-[1.02] ring-2 ring-[#C89B3C]/40'
+                              : 'bg-[#081B33] text-gray-300 border-[#C89B3C]/30 hover:border-[#C89B3C] hover:bg-[#0d2647]'
+                          }`}
+                        >
+                          <span>{goalItem.label}</span>
+                          {isSelected && <CheckCircle2 className="w-4 h-4 ml-0.5 flex-shrink-0 text-[#051224]" />}
+                        </button>
+                      );
+                    })}
+                  </div>
+
+                  <div className="mt-3 text-xs font-sans">
+                    {errors.goals ? (
+                      <p className="text-red-400 flex items-center gap-1 font-semibold">
+                        ⚠️ {errors.goals}
+                      </p>
+                    ) : selectedGoals.length > 0 ? (
+                      <span className="text-[#E5C170]">✓ {selectedGoals.length} {selectedGoals.length === 1 ? 'objetivo selecionado' : 'objetivos selecionados'} que serão analisados em seu diagnóstico.</span>
+                    ) : (
+                      <span className="text-gray-400">Nenhum objetivo selecionado ainda. Clique nas opções acima para selecionar.</span>
+                    )}
+                  </div>
                 </div>
 
                 <div className="pt-4 text-center">
@@ -185,19 +352,19 @@ export const PreDiagnosticCTA: React.FC = () => {
                     <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 ml-2 shrink-0 inline-block" />
                   </Button>
 
-                  <p className="text-xs text-gray-400 mt-3 font-sans leading-relaxed">
+                  <p className="text-sm sm:text-base text-gray-200 font-medium mt-3.5 font-sans leading-relaxed">
                     100% gratuito, confidencial e sem compromisso comercial. Atendimento online em todo o Brasil e exterior.
                   </p>
                 </div>
               </form>
 
-              <div className="mt-8 pt-6 border-t border-[#C89B3C]/15 grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs text-gray-400">
-                <div className="flex items-center space-x-2">
-                  <Shield className="w-4 h-4 text-[#C89B3C] shrink-0" />
+              <div className="mt-8 pt-6 border-t border-[#C89B3C]/20 grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm sm:text-base font-medium text-gray-200">
+                <div className="flex items-center space-x-2.5">
+                  <Shield className="w-5 h-5 text-[#C89B3C] shrink-0" />
                   <span>Sigilo absoluto de informações</span>
                 </div>
-                <div className="flex items-center space-x-2">
-                  <Clock className="w-4 h-4 text-[#C89B3C] shrink-0" />
+                <div className="flex items-center space-x-2.5">
+                  <Clock className="w-5 h-5 text-[#C89B3C] shrink-0" />
                   <span>Retorno em até 24 horas úteis</span>
                 </div>
               </div>
